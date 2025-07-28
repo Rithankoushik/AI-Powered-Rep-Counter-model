@@ -37,34 +37,45 @@ def process_video(video_path):
                 cv2.circle(img, points[12], 15, (255, 0, 0), cv2.FILLED)
                 cv2.circle(img, points[14], 15, (255, 0, 0), cv2.FILLED)
 
+                # Rep counting logic
                 if not up and points[14][1] + 40 < points[12][1]:
                     up = True
                     counter += 1
                 elif points[14][1] > points[12][1]:
                     up = False
 
-        cv2.putText(img, f"Reps: {counter}", (100, 150), cv2.FONT_HERSHEY_PLAIN, 12, (255, 0, 0), 12)
+        # Overlay counter on the video
+        cv2.putText(img, f"Reps: {counter}", (100, 150),
+                    cv2.FONT_HERSHEY_PLAIN, 12, (255, 0, 0), 12)
+
+        # Display the frame in the Streamlit app
         stframe.image(img, channels="BGR")
 
     cap.release()
+    return counter  # ✅ return the final rep count
 
 def main():
-    st.set_page_config(page_title="Exercise Rep Counter", layout="wide")
-    st.title("💪 Exercise Form Tracker with Repetition Counter")
-    st.sidebar.title("Upload a Video")
+    st.set_page_config(page_title="💪 AI Rep Counter", layout="wide")
+    st.title("🏋️ Exercise Rep Counter using MediaPipe")
+    st.sidebar.title("Upload your workout video")
 
     uploaded_file = st.sidebar.file_uploader("Choose a video file (.mp4, .avi)", type=["mp4", "avi"])
 
     if uploaded_file is not None:
-        # Save uploaded video to a temporary file
+        # Save uploaded video to temp file
         tfile = tempfile.NamedTemporaryFile(delete=False)
         tfile.write(uploaded_file.read())
 
         st.success("Processing your video...")
-        process_video(tfile.name)
+
+        # Run rep counter
+        final_count = process_video(tfile.name)
+
+        # ✅ Display final result
+        st.success(f"✅ Total Reps Counted: **{final_count}**")
 
     else:
-        st.info("👆 Upload a video from the sidebar to start.")
+        st.info("👆 Upload a video from the sidebar to begin.")
 
 if __name__ == "__main__":
     main()
